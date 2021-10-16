@@ -1,21 +1,16 @@
-from tasks.models import News
+from tasks.models import Books
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-class UserSerializer(serializers.ModelSerializer):
-
-     class Meta:
-        model = User
-        fields = ['id', 'username',]
-       
+from comments.serializers import CommentSerializer
 
 
-class NewsSerializer(serializers.ModelSerializer):
+class BooksSerializer(serializers.ModelSerializer):
 
-    owner = UserSerializer(read_only=True)
-    
+    author = serializers.ReadOnlyField(source='author.username')
+    comments = CommentSerializer(read_only=True, many=True)
+
     class Meta:
-        model = News
-        fields = ['id', 'owner', 'title', 'body', 'img',]
+        model = Books
+        fields = ['id', 'author', 'title', 'description', 'amount_of_upvotes', 'creation_date', 
+                  'comments', ]
+        read_only_fields = ['amount_of_upvotes', 'creation_date', ]

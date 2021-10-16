@@ -1,9 +1,12 @@
-from django.urls import path
-from tasks.views import NewsListView, NewsDetailGenericView
+from rest_framework.routers import SimpleRouter
 
-urlpatterns = [
-    path('', NewsListView.as_view()),
-    path('<int:id>/detail/', NewsDetailGenericView.as_view()),
+from tasks.views import BooksViewSet
 
 
-]
+router = SimpleRouter()
+
+router.register('books', BooksViewSet )
+
+urlpatterns = []
+
+urlpatterns += router.urls
