@@ -3,8 +3,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser
+from tasks.serializers import RatingSerializer
 
-from tasks.models import Books
+from tasks.models import Books, Rating
 from tasks.serializers import BooksSerializer
 from comments.serializers import CommentSerializer
 
@@ -42,74 +43,17 @@ class BooksViewSet(ModelViewSet):
         books.save()
         serializer = self.get_serializer_class()(instance=books)
         return Response(serializer.data)
-    
 
 
-
-
-
-
-
-
-
-
-# для отложеных задач  selery_bit
-
-# import schedule
-# import time
-
-# def some_func():
-#     print("I am just a lonely func")
-
-# schedule.every().day.at("10:30").do(some_func)
-
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-
-
-# pip3 install openpyxl
-
-# import openpyxl
-
-
-# wb = openpyxl.load_workbook(filename = '1.xlsx')
-# sheet = wb['Лист 1']
-# sheet['A2'] = 'значение в ячейке'
-
-# wb.save('1.xlsx')
-
-
-# import telebot
-# import schedule
-# import time
-
-
-# bot = telebot.TeleBot("")
-
-
-# def standupp():
-#     bot.send_message(номер_канала, "текст сообщения")
-
-
-# schedule.every().day.at("20:18").do(standupp)
-
-# while True:
-#     schedule.run_pending()
-#     time.sleep(1)
-
-# bot.polling()
-
-
-# import requests
-# from bs4 import BeautifulSoup
-
-# url = 'https://24.kg/'
-
-# source = requests.get(url)
-# main_text = source.text
-# soup = BeautifulSoup(main_text, "html.parser")
-
-# news = [zs.text for zs in soup.find_all('div', {'class': 'one'})]
-# print(news[:10])
+    @action(methods=['post'], detail=True, permission_classes=[IsAuthenticated, ])
+    def rating(self, request, *args, **kwargs):
+        books = self.get_object()
+        serializer = RatingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        rating, created = Rating.objects.get_or_create(books=books, author=request.user,
+                                              defaults={'value': serializer.validated_data['value']})
+        if not created:
+            rating.value = serializer.validated_data['value']
+            rating.save()
+        serializer = self.get_serializer(instance=books)
+        return Response(serializer.data)
