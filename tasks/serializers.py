@@ -12,5 +12,8 @@ class BooksSerializer(serializers.ModelSerializer):
     class Meta:
         model = Books
         fields = ['id', 'author', 'title', 'description', 'amount_of_upvotes', 'creation_date', 
-                  'comments', ]
-        read_only_fields = ['amount_of_upvotes', 'creation_date', ]
+                  'comments', 'rating', ]
+        read_only_fields = ['amount_of_upvotes', 'creation_date', 'rating', ]
+
+class RatingSerializer(serializers.Serializer):
+    value = serializers.IntegerField()
